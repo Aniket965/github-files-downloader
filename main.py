@@ -2,6 +2,7 @@
 # https://github.com/Aniket965/github-files-downloader
 # @aniket965
 
+import requests
 from termcolor import colored
 
 print(
@@ -19,8 +20,15 @@ print(
 
 
 def is_private_repo(url):
-    return True
+    return False
 
+
+def list_files_and_dir_from_url(url):
+    headers = {"Authorization": "token "}
+    json = {"query": "{ viewer  { login } }"}
+    x = requests.post('https://api.github.com/graphql', json=json, headers=headers)
+
+    print(x.json())
 
 repositoryUrl = input("Enter the Url of the Repository 😅\n")
 
@@ -39,4 +47,4 @@ if is_private_repo(repositoryUrl):
             )
         )
 else:
-    print(colored("lets Downloads", 'green'))
+    list_files_and_dir_from_url(repositoryUrl)
