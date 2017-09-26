@@ -6,6 +6,7 @@ import re
 
 import requests
 from github import Github
+from pick import pick
 from termcolor import colored
 
 g = Github("username", "pass")
@@ -40,19 +41,30 @@ def download_and_save_from_url(url, filepath, name):
 
 
 def list_files_and_dir_from_url(url):
-    for content in g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/"):
-        ref = re.search(r'ref=\w+', content.url, re.M | re.I).group()
-        # download_and_save_from_url(
-        #     get_content_download_url("Aniket965/github-files-downloader", ref[4:], content.name),
-        #     "ani"+content.name,
-        #     content.name
-        # )
-        #
-        if content.type == "dir":
-            print(colored("../" + content.name, "blue"))
-        else:
-            print(colored(content.name, "magenta"))
-
+    # for content in g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/"):
+    #     ref = re.search(r'ref=\w+', content.url, re.M | re.I).group()
+    #     # download_and_save_from_url(
+    #     #     get_content_download_url("Aniket965/github-files-downloader", ref[4:], content.name),
+    #     #     "ani"+content.name,
+    #     #     content.name
+    #     # )
+    #     #
+    #     if content.type == "dir":
+    #         print(colored("../" + content.name, "blue"))
+    #     else: ed(content.name, "magenta"))
+    contents = g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/")
+    title = "Select file or directory for downloading files"
+    dirs = ["../" + content.name for content in contents if content.type == "dir"]
+    files = [content for content in contents if content.type == "file"]
+    selected_content, index = pick(
+        ["download this directory and containg directories",
+         "download this directory only"]
+        + dirs + [file.name for file in files], title)
+    # print(contents[index])
+    i = [file.name for file in files].index(selected_content)
+    ref = re.search(r'ref=\w+', files[i].url, re.M | re.I).group()
+    download_and_save_from_url(get_content_download_url("Ujjwal-9/Demos", ref[4:], selected_content),
+                               "ani" + selected_content, selected_content)
 
 repositoryUrl = input("Enter the Url of the Repository 😅\n")
 
