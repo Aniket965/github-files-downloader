@@ -8,7 +8,7 @@ import requests
 from github import Github
 from termcolor import colored
 
-g = Github("usrname", "password")
+g = Github("username", "pass")
 print(
     colored(
         '''
@@ -31,15 +31,27 @@ def get_content_download_url(filepath, branch, filename):
     return "https://raw.githubusercontent.com/" + filepath + "/" + branch + "/" + filename
 
 
+def download_and_save_from_url(url, filepath, name):
+    file_content = requests.get(url)
+    file = open(filepath, "w")
+    print("Downloading!! " + name)
+    file.write(file_content.text)
+    file.close()
+
+
 def list_files_and_dir_from_url(url):
-    for content in g.get_repo(full_name_or_id="Aniket965/github-files-downloader").get_contents(path="/"):
+    for content in g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/"):
         ref = re.search(r'ref=\w+', content.url, re.M | re.I).group()
-        file_content = requests.get(
-            get_content_download_url("Aniket965/github-files-downloader", ref[4:], content.name))
-        file = open("ani" + content.name, "w")
-        print("Downloading!!    " + content.name)
-        file.write(file_content.text)
-        file.close()
+        # download_and_save_from_url(
+        #     get_content_download_url("Aniket965/github-files-downloader", ref[4:], content.name),
+        #     "ani"+content.name,
+        #     content.name
+        # )
+        #
+        if content.type == "dir":
+            print(colored("../" + content.name, "blue"))
+        else:
+            print(colored(content.name, "magenta"))
 
 
 repositoryUrl = input("Enter the Url of the Repository 😅\n")
