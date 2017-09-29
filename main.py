@@ -9,7 +9,7 @@ from github import Github
 from pick import pick
 from termcolor import colored
 
-g = Github("username", "pass")
+g = Github("username", "passs")
 print(
     colored(
         '''
@@ -29,7 +29,7 @@ def is_private_repo(url):
 
 
 def get_content_download_url(filepath, branch, filename):
-    return "https://raw.githubusercontent.com/" + filepath + "/" + branch + "/" + filename
+    return "https://raw.githubusercontent.com/" + filepath + "/" + branch + filename
 
 
 def download_and_save_from_url(url, filepath, name):
@@ -40,31 +40,36 @@ def download_and_save_from_url(url, filepath, name):
     file.close()
 
 
-def list_files_and_dir_from_url(url):
-    # for content in g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/"):
-    #     ref = re.search(r'ref=\w+', content.url, re.M | re.I).group()
-    #     # download_and_save_from_url(
-    #     #     get_content_download_url("Aniket965/github-files-downloader", ref[4:], content.name),
-    #     #     "ani"+content.name,
-    #     #     content.name
-    #     # )
-    #     #
-    #     if content.type == "dir":
-    #         print(colored("../" + content.name, "blue"))
-    #     else: ed(content.name, "magenta"))
-    contents = g.get_repo(full_name_or_id="Ujjwal-9/Demos").get_contents(path="/")
+def list_files_and_dir_from_url(url, path):
+    contents = g.get_repo(full_name_or_id=url).get_contents(path=path)
     title = "Select file or directory for downloading files"
     dirs = ["../" + content.name for content in contents if content.type == "dir"]
     files = [content for content in contents if content.type == "file"]
     selected_content, index = pick(
-        ["download this directory and containg directories",
-         "download this directory only"]
+        ["download Content of this directory and containg directories",
+         "download Content of this directory only"]
         + dirs + [file.name for file in files], title)
-    # print(contents[index])
-    i = [file.name for file in files].index(selected_content)
-    ref = re.search(r'ref=\w+', files[i].url, re.M | re.I).group()
-    download_and_save_from_url(get_content_download_url("Ujjwal-9/Demos", ref[4:], selected_content),
-                               "ani" + selected_content, selected_content)
+
+    if (index == 0):
+        pass
+    if (index == 1):
+        for file in files:
+            ref = re.search(r'ref=\w+', file.url, re.M | re.I).group()
+            download_and_save_from_url(
+                get_content_download_url(url, ref[4:], path[1:] + "/" + file.name),
+                "ani" + file.name, file.name)
+
+
+    elif (index < len(dirs) + 2 and selected_content in dirs):
+        # print()
+        list_files_and_dir_from_url(url, path + selected_content[2:])
+
+    else:
+        i = [file.name for file in files].index(selected_content)
+        ref = re.search(r'ref=\w+', files[i].url, re.M | re.I).group()
+        download_and_save_from_url(get_content_download_url(url, ref[4:], path[1:] + "/" + selected_content),
+                                   "ani" + selected_content, selected_content)
+
 
 repositoryUrl = input("Enter the Url of the Repository 😅\n")
 
@@ -83,4 +88,4 @@ if is_private_repo(repositoryUrl):
             )
         )
 else:
-    list_files_and_dir_from_url(repositoryUrl)
+    list_files_and_dir_from_url(repositoryUrl, "/")
